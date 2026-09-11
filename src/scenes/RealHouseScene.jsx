@@ -1,177 +1,217 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { ContactShadows, Environment, Html, useGLTF } from '@react-three/drei';
+import { Environment, Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 const MODEL_URL = 'https://raw.githubusercontent.com/MuhammadMuzamil-dev/threejs-architectural-walkthrough/main/Main%20Project/models/house.glb';
 
-// Deliberate architectural walkthrough. Positions are kept at human eye height
-// and doorway transitions are explicitly separated from room showcase moments.
-const SHOTS = [
-  { p:[0,1.66,17.5], t:[0,1.55,9.0], hold:.9, fov:40 },
-  { p:[0,1.65,13.6], t:[0,1.52,8.0], hold:.25, fov:41 },
-  { p:[0,1.64,10.7], t:[0,1.50,6.7], hold:.25, fov:42 },
-  { p:[0,1.63,8.55], t:[0,1.48,5.3], hold:.10, fov:43 },
-  { p:[0,1.63,7.30], t:[0,1.47,4.3], hold:.05, fov:44 },
-  { p:[0,1.62,5.85], t:[-0.6,1.43,3.2], hold:.45, fov:43 },
-  { p:[-0.55,1.62,4.65], t:[-2.1,1.40,2.6], hold:.08, fov:43 },
-  { p:[-1.55,1.62,3.75], t:[-3.0,1.38,1.8], hold:.05, fov:44 },
-  { p:[-2.65,1.61,2.45], t:[-2.7,1.28,-0.25], hold:.75, fov:39 },
-  { p:[-2.25,1.61,1.15], t:[-0.7,1.34,-1.1], hold:.10, fov:43 },
-  { p:[-1.05,1.61,0.20], t:[0.55,1.34,-1.75], hold:.05, fov:44 },
-  { p:[0.20,1.60,-0.65], t:[1.75,1.31,-2.35], hold:.05, fov:44 },
-  { p:[1.45,1.60,-1.70], t:[2.35,1.26,-3.65], hold:.15, fov:43 },
-  { p:[2.05,1.59,-3.05], t:[1.10,1.20,-4.95], hold:.70, fov:38 },
-  { p:[1.35,1.59,-4.20], t:[0.15,1.20,-5.90], hold:.12, fov:42 },
-  { p:[0.48,1.58,-5.30], t:[-0.08,1.16,-7.00], hold:.05, fov:43 },
-  { p:[0.02,1.57,-6.55], t:[0.00,1.12,-8.15], hold:.10, fov:43 },
-  { p:[-0.15,1.56,-7.65], t:[0.00,1.05,-9.25], hold:.55, fov:39 },
-  { p:[0.00,1.55,-8.55], t:[0.00,1.00,-10.05], hold:.9, fov:38 }
+// A walking route, not room-to-room jumps. Each turn is broken into an
+// approach -> doorway -> threshold -> room sequence so the camera does not
+// cut diagonally through walls.
+const WALK_PATH = [
+  { p: [0, 1.72, 16.0], t: [0, 1.62, 10.5] },
+  { p: [0, 1.70, 13.3], t: [0, 1.60, 9.0] },
+  { p: [0, 1.68, 11.2], t: [0, 1.58, 7.0] },
+  { p: [0, 1.66, 9.4], t: [0, 1.55, 5.7] },
+  { p: [0, 1.65, 8.15], t: [0, 1.52, 4.6] },
+  { p: [0, 1.64, 6.9], t: [0, 1.50, 3.4] },
+  { p: [0, 1.63, 5.2], t: [-1.2, 1.45, 2.5] },
+  { p: [-0.9, 1.62, 4.2], t: [-2.5, 1.42, 2.1] },
+  { p: [-1.8, 1.62, 3.5], t: [-3.2, 1.40, 1.2] },
+  { p: [-2.7, 1.62, 2.5], t: [-2.6, 1.35, -0.5] },
+  { p: [-2.3, 1.62, 1.0], t: [-0.6, 1.38, -1.1] },
+  { p: [-1.1, 1.61, 0.2], t: [0.6, 1.36, -1.8] },
+  { p: [0.3, 1.60, -0.6], t: [1.9, 1.35, -2.4] },
+  { p: [1.5, 1.60, -1.6], t: [2.5, 1.32, -3.8] },
+  { p: [2.1, 1.60, -3.0], t: [1.0, 1.28, -4.8] },
+  { p: [1.4, 1.59, -4.2], t: [0.2, 1.26, -5.8] },
+  { p: [0.5, 1.58, -5.3], t: [-0.1, 1.22, -7.0] },
+  { p: [0.0, 1.57, -6.6], t: [0.0, 1.18, -8.2] },
+  { p: [-0.2, 1.55, -7.7], t: [0.0, 1.12, -9.4] },
+  { p: [0.0, 1.52, -8.7], t: [0.0, 0.95, -10.2] }
 ];
 
-function LoadingModel(){
-  return <Html center><div className="model-loader">Preparing the residence</div></Html>;
+function LoadingModel() {
+  return (
+    <Html center>
+      <div style={{
+        padding: '10px 14px', borderRadius: 999,
+        background: 'rgba(0,0,0,.64)', border: '1px solid rgba(255,255,255,.16)',
+        color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+        letterSpacing: '.08em', textTransform: 'uppercase', whiteSpace: 'nowrap'
+      }}>
+        Loading real 3D house
+      </div>
+    </Html>
+  );
 }
 
-function RealHouseModel({ onReady }){
+function RealHouseModel({ onReady }) {
   const { scene } = useGLTF(MODEL_URL);
-  const prepared = useMemo(()=>{
+
+  const prepared = useMemo(() => {
     const clone = scene.clone(true);
-    clone.traverse((child)=>{
-      if(!child.isMesh) return;
+
+    clone.traverse((child) => {
+      if (!child.isMesh) return;
       child.castShadow = true;
       child.receiveShadow = true;
-      const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.filter(Boolean).forEach((m)=>{
-        if('envMapIntensity' in m) m.envMapIntensity = 1.25;
-        if('roughness' in m) m.roughness = THREE.MathUtils.clamp(m.roughness ?? .65,.22,.92);
-        if('metalness' in m) m.metalness = THREE.MathUtils.clamp(m.metalness ?? 0,0,.72);
-        m.needsUpdate = true;
-      });
+      if (child.material) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material) => {
+          if ('envMapIntensity' in material) material.envMapIntensity = 1.05;
+          if ('roughness' in material && material.roughness < 0.18) material.roughness = 0.18;
+          material.needsUpdate = true;
+        });
+      }
     });
+
     const box = new THREE.Box3().setFromObject(clone);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
-    box.getSize(size); box.getCenter(center);
-    const scale = 17 / Math.max(size.x,size.z,1);
+    box.getSize(size);
+    box.getCenter(center);
+
+    const footprint = Math.max(size.x, size.z, 1);
+    const scale = 17 / footprint;
+    const floorY = box.min.y;
+
     clone.scale.setScalar(scale);
-    clone.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
+    clone.position.set(-center.x * scale, -floorY * scale, -center.z * scale);
     clone.updateMatrixWorld(true);
+
     return clone;
-  },[scene]);
-  useEffect(()=>onReady?.(prepared),[prepared,onReady]);
-  return <primitive object={prepared}/>;
+  }, [scene]);
+
+  useEffect(() => {
+    onReady?.(prepared);
+  }, [prepared, onReady]);
+
+  return <primitive object={prepared} />;
 }
 
-function buildTimeline(){
-  const weights = SHOTS.slice(0,-1).map((s)=>1+s.hold*2.4);
-  const total = weights.reduce((a,b)=>a+b,0);
-  let acc=0;
-  return weights.map((w,i)=>{const start=acc/total; acc+=w; return {i,start,end:acc/total};});
-}
-const TIMELINE = buildTimeline();
+function CameraRig({ progress, collisionRoot }) {
+  const { camera } = useThree();
+  const currentPosition = useMemo(() => new THREE.Vector3(...WALK_PATH[0].p), []);
+  const currentTarget = useMemo(() => new THREE.Vector3(...WALK_PATH[0].t), []);
+  const desiredPosition = useMemo(() => new THREE.Vector3(), []);
+  const desiredTarget = useMemo(() => new THREE.Vector3(), []);
+  const candidate = useMemo(() => new THREE.Vector3(), []);
+  const travel = useMemo(() => new THREE.Vector3(), []);
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  const targetA = useMemo(() => new THREE.Vector3(), []);
+  const targetB = useMemo(() => new THREE.Vector3(), []);
+  const posA = useMemo(() => new THREE.Vector3(), []);
+  const posB = useMemo(() => new THREE.Vector3(), []);
 
-function cinematicEase(t){
-  t = THREE.MathUtils.clamp(t,0,1);
-  return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
-}
+  useEffect(() => {
+    camera.position.copy(currentPosition);
+    camera.lookAt(currentTarget);
+  }, [camera, currentPosition, currentTarget]);
 
-function CameraRig({progress,collisionRoot}){
-  const {camera} = useThree();
-  const currentP = useMemo(()=>new THREE.Vector3(...SHOTS[0].p),[]);
-  const currentT = useMemo(()=>new THREE.Vector3(...SHOTS[0].t),[]);
-  const desiredP = useMemo(()=>new THREE.Vector3(),[]);
-  const desiredT = useMemo(()=>new THREE.Vector3(),[]);
-  const a = useMemo(()=>new THREE.Vector3(),[]), b=useMemo(()=>new THREE.Vector3(),[]);
-  const ta=useMemo(()=>new THREE.Vector3(),[]), tb=useMemo(()=>new THREE.Vector3(),[]);
-  const candidate=useMemo(()=>new THREE.Vector3(),[]), travel=useMemo(()=>new THREE.Vector3(),[]);
-  const ray=useMemo(()=>new THREE.Raycaster(),[]);
+  useFrame((_, delta) => {
+    const maxIndex = WALK_PATH.length - 1;
+    const scaled = THREE.MathUtils.clamp(progress, 0, 0.99999) * maxIndex;
+    const index = Math.floor(scaled);
+    const nextIndex = Math.min(index + 1, maxIndex);
+    const local = scaled - index;
+    const mix = local * local * (3 - 2 * local);
 
-  useEffect(()=>{camera.position.copy(currentP);camera.lookAt(currentT);},[camera,currentP,currentT]);
+    posA.set(...WALK_PATH[index].p);
+    posB.set(...WALK_PATH[nextIndex].p);
+    targetA.set(...WALK_PATH[index].t);
+    targetB.set(...WALK_PATH[nextIndex].t);
 
-  useFrame((state,delta)=>{
-    const p=THREE.MathUtils.clamp(progress,0,.999999);
-    let seg=TIMELINE[TIMELINE.length-1];
-    for(const s of TIMELINE){ if(p>=s.start && p<s.end){seg=s;break;} }
-    const local=(p-seg.start)/(seg.end-seg.start || 1);
-    const hold=SHOTS[seg.i].hold;
-    const holdPart=Math.min(.34, hold*.22);
-    const moveStart=holdPart*.5;
-    const moveEnd=1-holdPart;
-    const moveT=cinematicEase(THREE.MathUtils.clamp((local-moveStart)/(moveEnd-moveStart),0,1));
+    desiredPosition.copy(posA).lerp(posB, mix);
+    desiredTarget.copy(targetA).lerp(targetB, mix);
 
-    a.set(...SHOTS[seg.i].p); b.set(...SHOTS[seg.i+1].p);
-    ta.set(...SHOTS[seg.i].t); tb.set(...SHOTS[seg.i+1].t);
-    desiredP.copy(a).lerp(b,moveT);
-    desiredT.copy(ta).lerp(tb,cinematicEase(moveT));
+    const damping = 1 - Math.exp(-delta * 4.0);
+    candidate.copy(currentPosition).lerp(desiredPosition, damping);
 
-    const damping=1-Math.exp(-delta*3.1);
-    candidate.copy(currentP).lerp(desiredP,damping);
-
-    if(collisionRoot){
-      travel.copy(candidate).sub(currentP);
-      const distance=travel.length();
-      if(distance>.0001){
-        ray.set(currentP,travel.normalize()); ray.near=.04; ray.far=distance+.20;
-        const hit=ray.intersectObject(collisionRoot,true).find(h=>h.distance>.12 && h.distance<distance+.14);
-        if(hit) candidate.copy(currentP).addScaledVector(travel,Math.max(0,hit.distance-.24));
+    if (collisionRoot) {
+      travel.copy(candidate).sub(currentPosition);
+      const distance = travel.length();
+      if (distance > 0.0001) {
+        raycaster.set(currentPosition, travel.normalize());
+        raycaster.near = 0.02;
+        raycaster.far = distance + 0.18;
+        const hits = raycaster.intersectObject(collisionRoot, true);
+        const blockingHit = hits.find((hit) => hit.distance > 0.10 && hit.distance < distance + 0.12);
+        if (blockingHit) {
+          const safeDistance = Math.max(0, blockingHit.distance - 0.28);
+          candidate.copy(currentPosition).addScaledVector(travel, safeDistance);
+        }
       }
     }
 
-    currentP.copy(candidate);
-    currentT.lerp(desiredT,1-Math.exp(-delta*2.8));
-    camera.position.copy(currentP);
-    camera.lookAt(currentT);
-
-    const targetFov=THREE.MathUtils.lerp(SHOTS[seg.i].fov,SHOTS[seg.i+1].fov,moveT);
-    camera.fov=THREE.MathUtils.damp(camera.fov,targetFov,3.2,delta);
-    camera.updateProjectionMatrix();
-
-    // restrained handheld drift: millimetres, not game-style head bob
-    const breathe=Math.sin(state.clock.elapsedTime*.58)*.006;
-    camera.position.y += breathe;
+    currentPosition.copy(candidate);
+    currentTarget.lerp(desiredTarget, 1 - Math.exp(-delta * 3.5));
+    camera.position.copy(currentPosition);
+    camera.lookAt(currentTarget);
   });
+
   return null;
 }
 
-function Scene({progress}){
-  const [root,setRoot]=useState(null);
-  return <>
-    <color attach="background" args={['#d8d7d2']}/>
-    <fog attach="fog" args={['#d8d7d2',30,68]}/>
-    <ambientLight intensity={.16}/>
-    <hemisphereLight args={['#e8edf0','#81796e',.78]}/>
-    <directionalLight position={[10,18,7]} intensity={3.0} color="#fff2dc" castShadow
-      shadow-mapSize-width={2048} shadow-mapSize-height={2048}
-      shadow-camera-near={.5} shadow-camera-far={65}
-      shadow-camera-left={-20} shadow-camera-right={20} shadow-camera-top={20} shadow-camera-bottom={-20}/>
-    <rectAreaLight position={[-3.5,4.8,4]} rotation={[-Math.PI/2,0,.35]} width={5} height={3} intensity={5.5} color="#fff7eb"/>
-    <rectAreaLight position={[3,3.4,-3]} rotation={[0,Math.PI,.1]} width={3} height={2} intensity={3.0} color="#ffe5c1"/>
+function Scene({ progress }) {
+  const [collisionRoot, setCollisionRoot] = useState(null);
 
-    <Suspense fallback={<LoadingModel/>}>
-      <RealHouseModel onReady={setRoot}/>
-      <Environment preset="city" environmentIntensity={.62}/>
-    </Suspense>
+  return (
+    <>
+      <color attach="background" args={['#c9d2d4']} />
+      <fog attach="fog" args={['#c9d2d4', 26, 58]} />
+      <ambientLight intensity={0.28} />
+      <hemisphereLight args={['#dce8f0', '#766f65', 0.95]} />
+      <directionalLight
+        position={[12, 18, 10]}
+        intensity={2.15}
+        color="#fff4df"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={0.5}
+        shadow-camera-far={60}
+        shadow-camera-left={-18}
+        shadow-camera-right={18}
+        shadow-camera-top={18}
+        shadow-camera-bottom={-18}
+      />
 
-    <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.025,0]} receiveShadow>
-      <planeGeometry args={[90,90]}/><meshStandardMaterial color="#8b8c84" roughness={1}/>
-    </mesh>
-    <ContactShadows position={[0,.01,0]} opacity={.32} scale={34} blur={2.5} far={14}/>
-    <CameraRig progress={progress} collisionRoot={root}/>
-  </>;
+      <Suspense fallback={<LoadingModel />}>
+        <RealHouseModel onReady={setCollisionRoot} />
+        <Environment preset="apartment" environmentIntensity={0.72} />
+      </Suspense>
+
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
+        <planeGeometry args={[90, 90]} />
+        <meshStandardMaterial color="#787d72" roughness={0.96} />
+      </mesh>
+
+      <CameraRig progress={progress} collisionRoot={collisionRoot} />
+    </>
+  );
 }
 
-export default function RealHouseScene({progress}){
-  return <div className="canvas-shell"><Canvas shadows dpr={[1,1.75]}
-    camera={{position:SHOTS[0].p,fov:40,near:.06,far:140}}
-    gl={{antialias:true,alpha:false,powerPreference:'high-performance'}}
-    onCreated={({gl})=>{
-      gl.outputColorSpace=THREE.SRGBColorSpace;
-      gl.toneMapping=THREE.ACESFilmicToneMapping;
-      gl.toneMappingExposure=1.06;
-      gl.shadowMap.enabled=true;
-      gl.shadowMap.type=THREE.PCFSoftShadowMap;
-    }}><Scene progress={progress}/></Canvas></div>;
+export default function RealHouseScene({ progress }) {
+  return (
+    <div className="canvas-shell">
+      <Canvas
+        shadows
+        dpr={[1, 1.6]}
+        camera={{ position: WALK_PATH[0].p, fov: 52, near: 0.08, far: 120 }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => {
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 0.96;
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+        }}
+      >
+        <Scene progress={progress} />
+      </Canvas>
+    </div>
+  );
 }
 
 useGLTF.preload(MODEL_URL);
