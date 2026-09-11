@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar.jsx';
 import ScrollProgress from './components/ScrollProgress.jsx';
 import SectionPanel from './components/SectionPanel.jsx';
-import HouseScene from './scenes/HouseScene.jsx';
+import ArchitecturalHouseScene from './scenes/ArchitecturalHouseScene.jsx';
 
 const sections = [
   {
@@ -79,7 +79,7 @@ export default function App() {
   return (
     <>
       <Navbar />
-      <HouseScene progress={progress} />
+      <ArchitecturalHouseScene progress={progress} />
       <ScrollProgress progress={progress} />
 
       <main>
