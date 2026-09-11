@@ -7,54 +7,53 @@ import RealHouseScene from './scenes/RealHouseScene.jsx';
 const sections = [
   {
     id: 'top',
-    eyebrow: 'Renofy immersive home',
-    title: 'Step inside better spaces.',
-    copy: 'A renovation should feel different before it even begins. Scroll through one Renofy home and explore how every room can be transformed with thoughtful design, skilled craftsmanship and a finish built to last.',
-    points: ['Whole-home renovations', 'Design + build', 'GTA homeowners']
+    eyebrow: 'Renofy — Toronto renovations',
+    title: 'Walk into what your home could become.',
+    copy: 'A guided journey through one reimagined home — from the first approach to the rooms that shape everyday life.',
+    points: ['Whole-home renovation', 'Design + build', 'Greater Toronto Area']
   },
   {
     id: 'entrance',
-    eyebrow: '01 — Entrance & foyer',
-    title: 'First impressions, rebuilt.',
-    copy: 'From the front door to the first sightline inside, we create entrances that feel considered, welcoming and connected to the rest of the home.',
-    points: ['Entry doors', 'Flooring', 'Trim & millwork', 'Lighting']
+    eyebrow: '01 — Arrival',
+    title: 'The renovation starts before you step inside.',
+    copy: 'A stronger entrance, better proportions and a clearer first sightline set the tone for everything beyond the front door.',
+    points: ['Exterior detailing', 'Entry doors', 'Lighting', 'Millwork']
   },
   {
     id: 'living',
-    eyebrow: '02 — Living spaces',
-    title: 'Make everyday space feel exceptional.',
-    copy: 'Open layouts, feature walls, integrated storage and refined finishes turn the rooms you use most into spaces you actually want to spend time in.',
+    eyebrow: '02 — Living',
+    title: 'Space that feels calm, open and considered.',
+    copy: 'We reshape circulation, sightlines and finishes so the rooms you use every day feel connected rather than simply renovated.',
     points: ['Layout changes', 'Feature walls', 'Flooring', 'Custom millwork']
   },
   {
     id: 'kitchen',
-    eyebrow: '03 — Kitchen renovations',
-    title: 'The heart of the home, redesigned.',
-    copy: 'We bring cabinetry, counters, lighting, flooring and flow together so the kitchen works as beautifully as it looks.',
-    points: ['Custom cabinetry', 'Stone counters', 'Backsplashes', 'Islands & lighting'],
+    eyebrow: '03 — Kitchen',
+    title: 'Built around the way you actually live.',
+    copy: 'Cabinetry, stone, lighting and movement come together in one cohesive room — practical enough for every day and refined enough to anchor the home.',
+    points: ['Custom cabinetry', 'Stone surfaces', 'Islands', 'Architectural lighting'],
     align: 'right'
   },
   {
     id: 'bathroom',
-    eyebrow: '04 — Bathroom renovations',
-    title: 'Quiet luxury, built for real life.',
-    copy: 'From compact powder rooms to complete primary ensuites, every surface is planned around durability, water management, comfort and clean detailing.',
-    points: ['Walk-in showers', 'Tile', 'Vanities', 'Fixtures'],
-    align: 'left'
+    eyebrow: '04 — Bath',
+    title: 'Quiet materials. Precise execution.',
+    copy: 'Durable waterproofing, balanced lighting and clean detailing create rooms that feel composed long after the renovation is complete.',
+    points: ['Walk-in showers', 'Large-format tile', 'Vanities', 'Fixtures']
   },
   {
     id: 'basement',
-    eyebrow: '05 — Basement finishing',
-    title: 'Turn unused square footage into living space.',
-    copy: 'Family rooms, home offices, entertainment spaces and flexible lower levels — finished to feel like part of the home, not an afterthought.',
-    points: ['Basement finishing', 'Media rooms', 'Home offices', 'Storage'],
+    eyebrow: '05 — Lower level',
+    title: 'Make every square foot belong to the home.',
+    copy: 'Finished basements should feel intentional, not secondary — with the same material language, comfort and attention as the main floor.',
+    points: ['Family rooms', 'Media spaces', 'Home offices', 'Storage'],
     align: 'right'
   },
   {
     id: 'finished',
     eyebrow: '06 — Complete home',
-    title: 'One home. One vision. Finished properly.',
-    copy: 'Renofy coordinates the details across the entire renovation so materials, proportions and finishes feel intentional from room to room.',
+    title: 'One renovation. One consistent vision.',
+    copy: 'From demolition to finishing details, Renofy coordinates the work so every room feels like part of the same home.',
     points: ['Planning', 'Construction', 'Finishing', 'Final walkthrough']
   }
 ];
@@ -99,14 +98,14 @@ export default function App() {
 
         <section className="contact-section" id="contact">
           <div className="contact-card">
-            <p className="eyebrow">Start your renovation</p>
-            <h2>Ready to transform your home?</h2>
-            <p>Tell us what you want to change and we’ll help you shape the next version of your space.</p>
+            <p className="eyebrow">Begin your project</p>
+            <h2>Make the next version of your home exceptional.</h2>
+            <p>Tell us what you want to change. We’ll help shape the plan, the build and the details that make it feel complete.</p>
             <div className="contact-actions">
-              <a href="mailto:hello@renofy.ca" className="primary-btn">Request a free quote</a>
+              <a href="mailto:hello@renofy.ca" className="primary-btn">Request a consultation</a>
               <a href="tel:+10000000000" className="secondary-btn">Call Renofy</a>
             </div>
-            <p className="microcopy">Replace the placeholder phone number before launch.</p>
+            <p className="microcopy">Toronto & Greater Toronto Area</p>
           </div>
           <footer>© {new Date().getFullYear()} Renofy. Renovations. Reimagined.</footer>
         </section>
