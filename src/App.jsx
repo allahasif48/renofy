@@ -13,147 +13,153 @@ const IMAGES = {
   basement: 'https://images.unsplash.com/photo-1760546120487-ccb54df9838c?auto=format&fit=crop&fm=jpg&q=88&w=2200'
 };
 
-const scenes = [
-  { id:'kitchen', no:'01', title:'Kitchens', line:'Built around the way you live.', detail:'Cabinetry · stone · islands · lighting', image:IMAGES.kitchen, accent:'STONE / CABINETRY / LIGHT' },
-  { id:'bathroom', no:'02', title:'Bathrooms', line:'Quiet materials. Precise execution.', detail:'Showers · tile · vanities · fixtures', image:IMAGES.bathroom, accent:'TILE / GLASS / WATER' },
-  { id:'living', no:'03', title:'Living', line:'Make the whole floor feel connected.', detail:'Layouts · flooring · millwork · feature walls', image:IMAGES.living, accent:'OAK / LIGHT / FLOW' },
-  { id:'basement', no:'04', title:'Basements', line:'Make every square foot belong.', detail:'Family rooms · offices · media · storage', image:IMAGES.basement, accent:'WARMTH / FUNCTION / SPACE' }
+const services = [
+  { id:'kitchen', no:'01', eyebrow:'Kitchen renovations', title:['THE HEART','OF A BETTER','HOME'], body:'Beautiful. Functional. Built for real life. From cabinetry to premium stone, we create kitchens that bring people together.', image:IMAGES.kitchen, note:'From materials to memories' },
+  { id:'bathroom', no:'02', eyebrow:'Bathroom renovations', title:['YOUR','EVERYDAY','ESCAPE'], body:'Modern design. Lasting quality. Transform your bathroom into a calm, considered space that feels like a retreat every day.', image:IMAGES.bathroom, note:'Small details. A bigger you.' },
+  { id:'living', no:'03', eyebrow:'Living spaces', title:['SPACES','THAT BRING','PEOPLE CLOSER'], body:'Open, inviting and built around your life. From flooring to feature walls, we create living spaces that feel like home.', image:IMAGES.living, note:'Designed for real life.' },
+  { id:'basement', no:'04', eyebrow:'Basement renovations', title:['MORE SPACE.','MORE','POSSIBILITIES.'], body:'Turn unused square footage into something extraordinary: family rooms, offices, media spaces and flexible living.', image:IMAGES.basement, note:'Finished spaces. Brighter futures.' }
 ];
 
-function Arrow(){ return <span aria-hidden="true">↗</span>; }
+function Arrow(){ return <span aria-hidden="true">→</span>; }
+
+function SplitTitle({ lines }){
+  return <h2>{lines.map((line,i)=><span className="line-mask" key={i}><span className="line-inner">{line}</span></span>)}</h2>;
+}
+
+function ServiceScene({service,index}){
+  return <section className={`service-band service-${index}`} id={service.id}>
+    <div className="service-copy-block">
+      <div className="eyebrow-row"><span>{service.no}</span><p>{service.eyebrow}</p></div>
+      <SplitTitle lines={service.title}/>
+      <p className="service-body">{service.body}</p>
+      <a className="inline-link magnetic" href="#contact">Explore {service.eyebrow.split(' ')[0]} <Arrow/></a>
+    </div>
+
+    <div className="assembly" aria-hidden="true">
+      <div className="assembly-photo"><img src={service.image} alt=""/></div>
+      <div className="piece piece-a"><img src={service.image} alt=""/></div>
+      <div className="piece piece-b"><img src={service.image} alt=""/></div>
+      <div className="piece piece-c"><img src={service.image} alt=""/></div>
+      <div className="piece piece-d"><img src={service.image} alt=""/></div>
+      <div className="assembly-rule one"/><div className="assembly-rule two"/>
+      <div className="material-dot dot-a"/><div className="material-dot dot-b"/>
+    </div>
+
+    <p className="side-note">{service.note}</p>
+  </section>;
+}
 
 export default function App(){
-  const root = useRef(null);
+  const root=useRef(null);
 
   useLayoutEffect(()=>{
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduce) return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const ctx = gsap.context(()=>{
-      gsap.timeline({scrollTrigger:{trigger:'.hero',start:'top top',end:'+=185%',scrub:1,pin:true}})
-        .fromTo('.hero-visual',{clipPath:'inset(15% 22% 18% 22% round 18px)',scale:.88},{clipPath:'inset(0% 0% 0% 0% round 0px)',scale:1,duration:1.15,ease:'none'},0)
-        .to('.hero-title .line-one',{xPercent:-18,duration:1},0)
-        .to('.hero-title .line-two',{xPercent:16,duration:1},0)
-        .to('.hero-visual img',{scale:1.14,yPercent:5,duration:1.6},0)
-        .fromTo('.material-chip.a',{x:'-32vw',rotate:-18},{x:'22vw',rotate:8,duration:1.4},0)
-        .fromTo('.material-chip.b',{x:'35vw',rotate:16},{x:'-20vw',rotate:-5,duration:1.4},0)
-        .to('.hero-intro',{y:-60,opacity:.25,duration:.55},.78)
-        .to('.hero-transition',{scaleY:1,duration:.28,ease:'power2.inOut'},1.22);
+    const ctx=gsap.context(()=>{
+      gsap.timeline({scrollTrigger:{trigger:'.hero-v2',start:'top top',end:'+=180%',pin:true,scrub:1.05}})
+        .fromTo('.hero-house',{scale:.82,yPercent:8},{scale:1,yPercent:0,duration:1},0)
+        .fromTo('.hero-layer.layer-a',{xPercent:-90,yPercent:-20,rotate:-8,opacity:.2},{xPercent:-13,yPercent:-7,rotate:-1,opacity:1,duration:1},0)
+        .fromTo('.hero-layer.layer-b',{xPercent:90,yPercent:-24,rotate:9,opacity:.2},{xPercent:15,yPercent:-4,rotate:1,opacity:1,duration:1},0)
+        .fromTo('.hero-layer.layer-c',{xPercent:-80,yPercent:72,rotate:-12,opacity:.1},{xPercent:-9,yPercent:18,rotate:-2,opacity:1,duration:1},.08)
+        .fromTo('.hero-layer.layer-d',{xPercent:78,yPercent:64,rotate:10,opacity:.1},{xPercent:11,yPercent:15,rotate:2,opacity:1,duration:1},.08)
+        .fromTo('.hero-specs li',{x:40,opacity:0},{x:0,opacity:1,stagger:.08,duration:.5},.28)
+        .to('.hero-title-v2 .gold',{xPercent:8,duration:.7},.45)
+        .to('.hero-copy-v2',{y:-30,opacity:.35,duration:.45},1.05);
 
-      gsap.from('.manifesto-word',{yPercent:110,stagger:.08,duration:1,ease:'power3.out',scrollTrigger:{trigger:'.manifesto',start:'top 72%'}});
-      gsap.to('.manifesto-media.left',{yPercent:-24,rotate:-5,scrollTrigger:{trigger:'.manifesto',start:'top bottom',end:'bottom top',scrub:1}});
-      gsap.to('.manifesto-media.right',{yPercent:18,rotate:5,scrollTrigger:{trigger:'.manifesto',start:'top bottom',end:'bottom top',scrub:1}});
-
-      gsap.utils.toArray('.motion-scene').forEach((scene,index)=>{
-        const q=gsap.utils.selector(scene);
-        const tl=gsap.timeline({scrollTrigger:{trigger:scene,start:'top top',end:'+=200%',pin:true,scrub:1,anticipatePin:1}});
-
-        const imageFrom = index===0
-          ? {clipPath:'inset(12% 34% 14% 8% round 18px)',scale:.86,xPercent:-4}
-          : index===1
-            ? {clipPath:'inset(6% 20% 30% 20% round 26px)',scale:.9,yPercent:8}
-            : index===2
-              ? {clipPath:'inset(18% 8% 18% 28% round 18px)',scale:.84,xPercent:5}
-              : {clipPath:'inset(32% 16% 8% 16% round 20px)',scale:.9,yPercent:-6};
-
-        tl.fromTo(q('.scene-image'),imageFrom,{clipPath:'inset(0% 0% 0% 0% round 0px)',scale:1,xPercent:0,yPercent:0,duration:1,ease:'none'},0)
-          .fromTo(q('.scene-image img'),{scale:index===3?1.18:1.28,filter:index===3?'brightness(.48) saturate(.55)':'brightness(.82) saturate(.72)'},{scale:1.03,filter:'brightness(1) saturate(.82)',duration:1.45},0)
-          .fromTo(q('.scene-title'),{xPercent:index%2?-35:35,opacity:.08,rotate:index===2?-2:0},{xPercent:0,opacity:1,rotate:0,duration:.72},.08)
-          .fromTo(q('.scene-number'),{y:90,opacity:0},{y:0,opacity:1,duration:.45},.18)
-          .fromTo(q('.scene-copy'),{y:75,opacity:0},{y:0,opacity:1,duration:.55},.34)
-          .fromTo(q('.scene-accent'),{scaleX:0},{scaleX:1,duration:.65},.22)
-          .fromTo(q('.scene-accent-label'),{opacity:0,y:24},{opacity:1,y:0,duration:.42},.42)
-          .fromTo(q('.scene-strip.one'),{xPercent:index%2?-125:125,rotate:index%2?-8:8},{xPercent:index%2?18:-18,rotate:index%2?4:-4,duration:1.25},.05)
-          .fromTo(q('.scene-strip.two'),{xPercent:index%2?125:-125,rotate:index%2?7:-7},{xPercent:index%2?-18:18,rotate:index%2?-3:3,duration:1.25},.05)
-          .to(q('.scene-title'),{scale:1.08,yPercent:-10,duration:.5},.93)
-          .to(q('.scene-copy'),{y:-28,opacity:.18,duration:.38},1.02)
-          .to(q('.scene-exit'),{scaleY:1,duration:.24,ease:'power2.inOut'},1.14);
+      gsap.utils.toArray('.service-band').forEach((section,index)=>{
+        const q=gsap.utils.selector(section);
+        const isLight=index===1 || index===3;
+        const tl=gsap.timeline({scrollTrigger:{trigger:section,start:'top top',end:'+=170%',pin:true,scrub:1,anticipatePin:1}});
+        tl.from(q('.line-inner'),{yPercent:110,stagger:.08,duration:.6,ease:'power3.out'},0)
+          .fromTo(q('.assembly-photo'),{scale:.9,clipPath:'inset(10% 14% 12% 14% round 16px)'},{scale:1,clipPath:'inset(0% 0% 0% 0% round 0px)',duration:.9},0)
+          .fromTo(q('.piece-a'),{xPercent:-180,yPercent:-30,rotate:-16,opacity:0},{xPercent:-48,yPercent:-8,rotate:-4,opacity:1,duration:.85},.05)
+          .fromTo(q('.piece-b'),{xPercent:170,yPercent:-22,rotate:14,opacity:0},{xPercent:50,yPercent:-5,rotate:3,opacity:1,duration:.85},.08)
+          .fromTo(q('.piece-c'),{xPercent:-150,yPercent:120,rotate:-10,opacity:0},{xPercent:-35,yPercent:48,rotate:-2,opacity:1,duration:.85},.12)
+          .fromTo(q('.piece-d'),{xPercent:150,yPercent:110,rotate:12,opacity:0},{xPercent:36,yPercent:43,rotate:2,opacity:1,duration:.85},.15)
+          .fromTo(q('.assembly-rule'),{scaleX:0},{scaleX:1,stagger:.1,duration:.45},.28)
+          .fromTo(q('.material-dot'),{scale:0,opacity:0},{scale:1,opacity:1,stagger:.1,duration:.4},.35)
+          .fromTo(q('.side-note'),{y:50,opacity:0},{y:0,opacity:1,duration:.45},.5)
+          .to(q('.assembly'),{xPercent:index%2?-3:3,yPercent:index%2?2:-2,duration:.6},.85)
+          .to(q('.piece-a'),{xPercent:-62,yPercent:-18,rotate:-8,duration:.45},.92)
+          .to(q('.piece-b'),{xPercent:64,yPercent:-13,rotate:7,duration:.45},.92)
+          .to(q('.piece-c'),{xPercent:-47,yPercent:59,rotate:-5,duration:.45},.92)
+          .to(q('.piece-d'),{xPercent:50,yPercent:54,rotate:5,duration:.45},.92)
+          .to(section,{backgroundColor:isLight?'#eee9e1':'#0b0b0b',duration:.01},0);
       });
 
-      const steps=gsap.utils.toArray('.process-step');
-      gsap.timeline({scrollTrigger:{trigger:'.process',start:'top top',end:'+=155%',pin:true,scrub:1}})
-        .to('.process-progress',{scaleX:1,duration:1,ease:'none'})
-        .fromTo(steps,{opacity:.16,y:55},{opacity:1,y:0,stagger:.18,duration:.45},0)
-        .fromTo('.process-orbit',{rotate:-80,scale:.7,opacity:0},{rotate:0,scale:1,opacity:1,duration:.8},.08);
+      gsap.timeline({scrollTrigger:{trigger:'.process-v2',start:'top top',end:'+=120%',pin:true,scrub:1}})
+        .fromTo('.process-fill',{scaleX:0},{scaleX:1,duration:1,ease:'none'})
+        .fromTo('.process-item',{y:45,opacity:.15},{y:0,opacity:1,stagger:.18,duration:.45},0)
+        .to('.process-counter',{rotate:360,duration:1,ease:'none'},0);
 
-      gsap.timeline({scrollTrigger:{trigger:'.final-project',start:'top top',end:'+=150%',pin:true,scrub:1}})
-        .fromTo('.final-frame',{clipPath:'inset(0% 0% 0% 0% round 0px)',scale:1},{clipPath:'inset(10% 10% 12% 10% round 22px)',scale:.92,duration:.72})
-        .fromTo('.final-project img',{scale:1.2},{scale:1.02,duration:1},0)
-        .fromTo('.final-project-copy',{y:120,opacity:0},{y:0,opacity:1,duration:.55},.18)
-        .to('.cta-preview',{scaleY:1,duration:.35,ease:'power2.inOut'},.68);
+      gsap.timeline({scrollTrigger:{trigger:'.project-proof',start:'top 75%',end:'bottom 20%',scrub:1}})
+        .fromTo('.before-panel',{xPercent:-12},{xPercent:0,duration:1},0)
+        .fromTo('.after-panel',{xPercent:12},{xPercent:0,duration:1},0)
+        .fromTo('.proof-divider',{scaleY:0},{scaleY:1,duration:.8},.1);
 
-      gsap.utils.toArray('.magnetic').forEach((el)=>{
-        const move=(e)=>{
-          const r=el.getBoundingClientRect();
-          gsap.to(el,{x:(e.clientX-r.left-r.width/2)*.14,y:(e.clientY-r.top-r.height/2)*.14,duration:.25,ease:'power2.out'});
-        };
+      gsap.fromTo('.footer-cta-v2 h2',{y:100,opacity:0},{y:0,opacity:1,duration:1,ease:'power3.out',scrollTrigger:{trigger:'.footer-cta-v2',start:'top 72%'}});
+
+      gsap.utils.toArray('.magnetic').forEach(el=>{
+        const move=e=>{const r=el.getBoundingClientRect();gsap.to(el,{x:(e.clientX-r.left-r.width/2)*.12,y:(e.clientY-r.top-r.height/2)*.12,duration:.22})};
         const reset=()=>gsap.to(el,{x:0,y:0,duration:.35,ease:'power3.out'});
-        el.addEventListener('mousemove',move); el.addEventListener('mouseleave',reset);
+        el.addEventListener('mousemove',move);el.addEventListener('mouseleave',reset);
       });
     },root);
+
     return ()=>ctx.revert();
   },[]);
 
   return <div ref={root}>
     <Navbar/>
     <main>
-      <section className="hero" id="top">
-        <div className="hero-visual"><img src={IMAGES.exterior} alt="Modern renovated Toronto home"/></div>
-        <div className="hero-shade"/>
-        <p className="hero-kicker">Renofy / Toronto + GTA</p>
-        <h1 className="hero-title"><span className="line-one">RENOVATE</span><span className="line-two">BETTER.</span></h1>
-        <div className="hero-intro"><p>Thoughtful renovations. One coordinated build. Details that feel intentional.</p><a className="magnetic" href="#services">Explore <Arrow/></a></div>
-        <div className="material-chip a">STONE / 01</div><div className="material-chip b">CRAFT / 02</div>
-        <div className="scroll-cue">SCROLL TO TRANSFORM <i/></div>
-        <div className="hero-transition"/>
+      <section className="hero-v2" id="top">
+        <div className="hero-copy-v2">
+          <p className="hero-kicker-v2">Toronto & GTA renovations</p>
+          <h1 className="hero-title-v2"><span>RENOVATE</span><span>BETTER.</span><span className="gold">LIVE BRIGHTER.</span></h1>
+          <p className="hero-sub">Thoughtful renovations. Lasting value. From kitchens to full-home transformations, Renofy creates spaces you’ll love to live in.</p>
+          <a className="scroll-link magnetic" href="#services"><span>↓</span> Scroll to explore</a>
+        </div>
+
+        <div className="hero-assembly" aria-hidden="true">
+          <div className="hero-house"><img src={IMAGES.exterior} alt=""/></div>
+          <div className="hero-layer layer-a"><img src={IMAGES.exterior} alt=""/></div>
+          <div className="hero-layer layer-b"><img src={IMAGES.exterior} alt=""/></div>
+          <div className="hero-layer layer-c"><img src={IMAGES.exterior} alt=""/></div>
+          <div className="hero-layer layer-d"><img src={IMAGES.exterior} alt=""/></div>
+        </div>
+
+        <ul className="hero-specs"><li>Roofing</li><li>Millwork</li><li>Glass</li><li>Concrete</li><li>Spaces</li><li>A brighter you</li></ul>
+        <div className="hero-index"><b>01</b><span>02</span><span>03</span><span>04</span><span>05</span></div>
       </section>
 
-      <section className="manifesto" id="work">
-        <p className="section-label">What we believe</p>
-        <h2>{['ONE','HOME.','ONE','VISION.'].map((w,i)=><span className="manifesto-mask" key={i}><span className="manifesto-word">{w}</span></span>)}</h2>
-        <p className="manifesto-copy">Renofy brings planning, construction and finishing together so a renovation feels coherent from the first demolition cut to the last piece of trim.</p>
-        <img className="manifesto-media left" src={IMAGES.kitchen} alt="Renovated kitchen"/>
-        <img className="manifesto-media right" src={IMAGES.bathroom} alt="Renovated bathroom"/>
+      <section id="services" className="services-v2">
+        {services.map((service,index)=><ServiceScene key={service.id} service={service} index={index}/>) }
       </section>
 
-      <section id="services" className="scene-stack">
-        {scenes.map((s,i)=><article className={`motion-scene tone-${i}`} id={s.id} key={s.id}>
-          <div className="scene-image"><img src={s.image} alt={`${s.title} renovation`}/></div>
-          <div className="scene-overlay"/>
-          <span className="scene-number">{s.no}</span>
-          <h2 className="scene-title">{s.title}</h2>
-          <div className="scene-copy"><h3>{s.line}</h3><p>{s.detail}</p></div>
-          <div className="scene-accent"/><div className="scene-accent-label">{s.accent}</div>
-          <div className="scene-strip one">RENOVATE BETTER · RENOVATE BETTER · RENOVATE BETTER</div>
-          <div className="scene-strip two">DESIGN · BUILD · FINISH · TORONTO · GTA</div>
-          <div className="scene-exit"/>
-        </article>)}
-      </section>
-
-      <section className="process" id="process">
-        <div className="process-head"><p className="section-label">How Renofy works</p><h2>From idea<br/>to handover.</h2></div>
-        <div className="process-orbit">01—04</div>
-        <div className="process-rail"><div className="process-progress"/></div>
-        <div className="process-steps">
+      <section className="process-v2" id="process">
+        <div className="process-title-block"><p className="section-label">Our process</p><h2>A clearer path<br/>to a better home.</h2><p>A simple, transparent process from start to finish. Less stress. Better decisions.</p></div>
+        <div className="process-counter">01—04</div>
+        <div className="process-line"><div className="process-fill"/></div>
+        <div className="process-grid">
           {[
-            ['01','Discover','Understand the space, goals and priorities.'],
-            ['02','Define','Align scope, selections and sequencing.'],
-            ['03','Build','Coordinate the work under one clear plan.'],
-            ['04','Finish','Complete the details and final walkthrough.']
-          ].map(x=><article className="process-step" key={x[0]}><span>{x[0]}</span><h3>{x[1]}</h3><p>{x[2]}</p></article>)}
+            ['01','Discover','Understand your goals and space.'],['02','Define','Design and plan with clarity.'],['03','Build','Expert construction and communication.'],['04','Finish','A space you’ll love for years to come.']
+          ].map(([n,t,c])=><article className="process-item" key={n}><span>{n}</span><h3>{t}</h3><p>{c}</p></article>)}
         </div>
       </section>
 
-      <section className="final-project">
-        <div className="final-frame"><img src={IMAGES.living} alt="Finished Renofy living space"/></div>
-        <div className="final-project-copy"><p className="section-label">The outcome</p><h2>A home that feels finished — not simply renovated.</h2></div>
-        <div className="cta-preview"/>
+      <section className="project-proof" id="projects">
+        <div className="proof-copy"><p className="section-label">Featured project</p><h2>Real homes.<br/>Real transformations.</h2><p>See how we turn ideas into beautiful, functional spaces across Toronto and the GTA.</p><a href="#contact" className="inline-link magnetic">View all projects <Arrow/></a></div>
+        <div className="proof-media">
+          <div className="proof-panel before-panel"><img src={IMAGES.basement} alt="Before renovation reference"/><span>Before</span></div>
+          <div className="proof-panel after-panel"><img src={IMAGES.living} alt="Finished renovation reference"/><span>After</span></div>
+          <div className="proof-divider"><b>↔</b></div>
+        </div>
       </section>
 
-      <section className="cta" id="contact">
-        <p className="section-label">Renofy / Toronto</p><h2>YOUR HOME<br/>COULD BE NEXT.</h2>
-        <a className="cta-primary magnetic" href="mailto:hello@renofy.ca">Start your renovation <Arrow/></a>
-        <footer><span>© {new Date().getFullYear()} Renofy</span><span>Toronto & Greater Toronto Area</span><span>Photography references via Unsplash</span></footer>
+      <section className="footer-cta-v2" id="contact">
+        <div className="footer-brand">RENOFY<small>Better spaces. Brighter living.</small></div>
+        <div><h2>Your home could be next.</h2><p>Let’s create a space you’ll love to live in.</p><div className="footer-actions"><a className="gold-btn magnetic" href="mailto:hello@renofy.ca">Get a quote <Arrow/></a><a className="ghost-btn magnetic" href="mailto:hello@renofy.ca">Talk to our team</a></div></div>
+        <div className="footer-meta"><span>Serving Toronto & GTA</span><span>Kitchens · Bathrooms · Basements · Full homes</span></div>
       </section>
     </main>
   </div>;
